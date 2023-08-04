@@ -7,72 +7,82 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
 
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code  # Шаг для клонирования репозитория
+      - name: Checkout code  
         uses: actions/checkout@v2
 
-      - name: Set up Python  # Шаг для установки Python
+      - name: Set up Python  
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x  # Указываем, что нам нужна версия Python 3.x
+          python-version: 3.x 
 
-      - name: Install dependencies  # Шаг для установки зависимостей
+      - name: Install dependencies  
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          chmod +x wait-for-it.sh
+
+      - name: Run Django tests  
+        run: |
+          python manage.py test
+
+      - name: Build and push Docker image 
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          docker build -t myproject .  
+          docker tag myproject $DOCKER_USERNAME/myproject  
+          docker push $DOCKER_USERNAME/myproject
+          
+      - name: Build Docker Compose
+        run: |
+          sudo docker compose up -d
 
       - name: Run Django tests  # Шаг для запуска тестов Django
         run: |
           python manage.py test
 
-      - name: Build and push Docker image  # Шаг для создания и публикации Docker-образа
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Загружаем переменные окружения из Secrets
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Down Docker Compose
         run: |
-          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-          docker build -t myproject .  # Замените "myproject" на имя вашего Docker-образа
-          docker tag myproject $DOCKER_USERNAME/myproject  # Тегируем образ перед публикацией
-          docker push $DOCKER_USERNAME/myproject
+          sudo docker compose down
 
-#     steps:
-#     - name: Checkout code  # Шаг для клонирования репозитория
-#       uses: actions/checkout@v2
-
-#     - name: Set up Python  # Шаг для установки Python
-#       uses: actions/setup-python@v2
-#       with:
-#         python-version: 3.x  # Указываем, что нам нужна версия Python 3.x
-
-#     - name: Install dependencies  # Шаг для установки зависимостей
-#       run: |
-#         python -m pip install --upgrade pip
-#         pip install -r requirements.txt
-#         chmod +x wait-for-it.sh
-
-# #     - name: Build Docker Compose
-# #       run: |
-# #         sudo docker compose up -d
-
-# #     - name: Run Django tests  # Шаг для запуска тестов Django
-# #       run: |
-# #         python manage.py test
+  deploy:
+  
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Deploy to server
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_USERNAME: your_server_username
+        SSH_HOST: your_server_ip_address
+      if: github.ref == 'refs/heads/main' # Deploy only when push to main
+      run: |
+        mkdir -p ~/.ssh
+        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+        scp docker-compose.yml $SSH_USERNAME@$SSH_HOST:/path/to/your/docker-compose.yml
+        ssh $SSH_USERNAME@$SSH_HOST "docker-compose pull && docker-compose up -d"
         
-# #     - name: Down Docker Compose
-# #       run: |
-# #         sudo docker compose down
-        
-        
-#     - name: Build and push Docker image  
-#       env:
-#         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
-#         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#       run: |
-#         sudo docker build -t myproject .  
-#         sudo docker tag myproject $DOCKER_USERNAME/myproject 
-#         sudo docker push $DOCKER_USERNAME/myproject 
+    - name: Build and push Docker image to Azure ACR
+      env:
+        AZURE_REGISTRY: ${{ secrets.AZURE_REGISTRY }}
+        AZURE_APP_ID: ${{ secrets.AZURE_APP_ID }}
+        AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
+        AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
+      run: |
+        # Log in to Azure Container Registry
+        echo $AZURE_PASSWORD | docker login $AZURE_REGISTRY --username $AZURE_APP_ID --password-stdin
+
+        # Build and tag the Docker image
+        docker build -t $AZURE_REGISTRY/myproject .
+
+        # Push the Docker image to Azure Container Registry
+        docker push $AZURE_REGISTRY/myproject
