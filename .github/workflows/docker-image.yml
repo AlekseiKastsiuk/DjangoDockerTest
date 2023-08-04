@@ -27,9 +27,6 @@ jobs:
         pip install -r requirements.txt
         chmod +x wait-for-it.sh
 
-    - name: Login to Docker Hub
-      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
     - name: Build Docker Compose
       run: |
         sudo docker compose up -d
@@ -41,3 +38,13 @@ jobs:
     - name: Down Docker Compose
       run: |
         sudo docker compose down
+        
+        
+    - name: Build and push Docker image  
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker build -t mydjangoproject .  
+        docker tag mydjangoproject $DOCKER_USERNAME/mydjangoproject 
+        docker push $DOCKER_USERNAME/mydjangoproject 
