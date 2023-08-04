@@ -113,3 +113,16 @@ jobs:
           echo "there must be your servers to deploy"
     
 
+
+
+  send_message:
+    name: Send telegram notification
+    runs-on: ubuntu-latest
+    needs: prod
+    steps:
+      - name: Send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ github.workflow }} done!
