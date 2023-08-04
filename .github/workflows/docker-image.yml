@@ -25,6 +25,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        chmod +x wait-for-it.sh
 
     - name: Run Django tests  # Шаг для запуска тестов Django
       run: |
