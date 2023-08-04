@@ -54,35 +54,39 @@ jobs:
 
   deploy:
   
+    needs: build 
     runs-on: ubuntu-latest
     steps:
+      - name: message
+        run: |
+          echo "there must be your servers to deploy"
     
-    - name: Deploy to server
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_USERNAME: your_server_username
-        SSH_HOST: your_server_ip_address
-      if: github.ref == 'refs/heads/main' # Deploy only when push to main
-      run: |
-        mkdir -p ~/.ssh
-        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-        scp docker-compose.yml $SSH_USERNAME@$SSH_HOST:/path/to/your/docker-compose.yml
-        ssh $SSH_USERNAME@$SSH_HOST "docker-compose pull && docker-compose up -d"
+#     - name: Deploy to server
+#       env:
+#         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#         SSH_USERNAME: your_server_username
+#         SSH_HOST: your_server_ip_address
+#       if: github.ref == 'refs/heads/main' # Deploy only when push to main
+#       run: |
+#         mkdir -p ~/.ssh
+#         echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+#         chmod 600 ~/.ssh/id_rsa
+#         ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+#         scp docker-compose.yml $SSH_USERNAME@$SSH_HOST:/path/to/your/docker-compose.yml
+#         ssh $SSH_USERNAME@$SSH_HOST "docker-compose pull && docker-compose up -d"
         
-    - name: Build and push Docker image to Azure ACR
-      env:
-        AZURE_REGISTRY: ${{ secrets.AZURE_REGISTRY }}
-        AZURE_APP_ID: ${{ secrets.AZURE_APP_ID }}
-        AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
-        AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
-      run: |
-        # Log in to Azure Container Registry
-        echo $AZURE_PASSWORD | docker login $AZURE_REGISTRY --username $AZURE_APP_ID --password-stdin
+#     - name: Build and push Docker image to Azure ACR
+#       env:
+#         AZURE_REGISTRY: ${{ secrets.AZURE_REGISTRY }}
+#         AZURE_APP_ID: ${{ secrets.AZURE_APP_ID }}
+#         AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
+#         AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
+#       run: |
+#         # Log in to Azure Container Registry
+#         echo $AZURE_PASSWORD | docker login $AZURE_REGISTRY --username $AZURE_APP_ID --password-stdin
 
-        # Build and tag the Docker image
-        docker build -t $AZURE_REGISTRY/myproject .
+#         # Build and tag the Docker image
+#         docker build -t $AZURE_REGISTRY/myproject .
 
-        # Push the Docker image to Azure Container Registry
-        docker push $AZURE_REGISTRY/myproject
+#         # Push the Docker image to Azure Container Registry
+#         docker push $AZURE_REGISTRY/myproject
