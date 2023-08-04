@@ -27,20 +27,18 @@ jobs:
         pip install -r requirements.txt
         chmod +x wait-for-it.sh
 
-    - name: Run Django tests  # Шаг для запуска тестов Django
-      run: |
-        python manage.py test
-
-
     - name: Login to Docker Hub
       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and Push Docker Images
       run: |
-        docker-compose up -d
-        docker-compose build
-        docker-compose push
+        sudo docker-compose up -d
+        sudo docker-compose build
+        sudo docker-compose push
 
+    - name: Run Django tests  # Шаг для запуска тестов Django
+      run: |
+        python manage.py test
 
 #     - name: Build and push Docker image  
 #       env:
