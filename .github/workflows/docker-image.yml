@@ -44,7 +44,7 @@ jobs:
         run: |
           sudo docker compose up -d
 
-      - name: Run Django tests  # Шаг для запуска тестов Django
+      - name: Run Django tests  
         run: |
           python manage.py test
 
@@ -90,3 +90,26 @@ jobs:
 #           az acr login --name $REGISTRY
 #           docker-compose -f $COMPOSE_FILE build
 #           docker-compose -f $COMPOSE_FILE push
+
+
+  stages:
+  
+    needs: build 
+    runs-on: ubuntu-latest
+    steps:
+      - name: message
+        run: |
+          echo "there must be your servers to deploy"
+
+  prod:
+  
+    needs:
+      - deploy
+      - stages
+    runs-on: ubuntu-latest
+    steps:
+      - name: message
+        run: |
+          echo "there must be your servers to deploy"
+    
+
