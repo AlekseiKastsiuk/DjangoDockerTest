@@ -11,40 +11,68 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code  # Шаг для клонирования репозитория
-      uses: actions/checkout@v2
+      - name: Checkout code  # Шаг для клонирования репозитория
+        uses: actions/checkout@v2
 
-    - name: Set up Python  # Шаг для установки Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x  # Указываем, что нам нужна версия Python 3.x
+      - name: Set up Python  # Шаг для установки Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x  # Указываем, что нам нужна версия Python 3.x
 
-    - name: Install dependencies  # Шаг для установки зависимостей
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        chmod +x wait-for-it.sh
+      - name: Install dependencies  # Шаг для установки зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-#     - name: Build Docker Compose
+      - name: Run Django tests  # Шаг для запуска тестов Django
+        run: |
+          python manage.py test
+
+      - name: Build and push Docker image  # Шаг для создания и публикации Docker-образа
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Загружаем переменные окружения из Secrets
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          docker build -t myproject .  # Замените "myproject" на имя вашего Docker-образа
+          docker tag myproject $DOCKER_USERNAME/myproject  # Тегируем образ перед публикацией
+          docker push $DOCKER_USERNAME/myproject
+
+#     steps:
+#     - name: Checkout code  # Шаг для клонирования репозитория
+#       uses: actions/checkout@v2
+
+#     - name: Set up Python  # Шаг для установки Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: 3.x  # Указываем, что нам нужна версия Python 3.x
+
+#     - name: Install dependencies  # Шаг для установки зависимостей
 #       run: |
-#         sudo docker compose up -d
+#         python -m pip install --upgrade pip
+#         pip install -r requirements.txt
+#         chmod +x wait-for-it.sh
 
-#     - name: Run Django tests  # Шаг для запуска тестов Django
+# #     - name: Build Docker Compose
+# #       run: |
+# #         sudo docker compose up -d
+
+# #     - name: Run Django tests  # Шаг для запуска тестов Django
+# #       run: |
+# #         python manage.py test
+        
+# #     - name: Down Docker Compose
+# #       run: |
+# #         sudo docker compose down
+        
+        
+#     - name: Build and push Docker image  
+#       env:
+#         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
+#         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 #       run: |
-#         python manage.py test
-        
-#     - name: Down Docker Compose
-#       run: |
-#         sudo docker compose down
-        
-        
-    - name: Build and push Docker image  
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-      run: |
-        sudo docker build -t mydjangoproject .  
-        sudo docker tag mydjangoproject $DOCKER_USERNAME/mydjangoproject 
-        sudo docker push $DOCKER_USERNAME/mydjangoproject 
+#         sudo docker build -t myproject .  
+#         sudo docker tag myproject $DOCKER_USERNAME/myproject 
+#         sudo docker push $DOCKER_USERNAME/myproject 
