@@ -36,6 +36,6 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        docker build -t myproject .  # Замените "myproject" на имя вашего Docker-образа
+        docker-compose -f docker-compose.yml up -d 
         docker tag myproject $DOCKER_USERNAME/myproject  # Тегируем образ перед публикацией
         docker push $DOCKER_USERNAME/myproject  # Публикуем образ на Docker Hub или другой реестр Docker
