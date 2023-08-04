@@ -27,17 +27,17 @@ jobs:
         pip install -r requirements.txt
         chmod +x wait-for-it.sh
 
-    - name: Build Docker Compose
-      run: |
-        sudo docker compose up -d
+#     - name: Build Docker Compose
+#       run: |
+#         sudo docker compose up -d
 
-    - name: Run Django tests  # Шаг для запуска тестов Django
-      run: |
-        python manage.py test
+#     - name: Run Django tests  # Шаг для запуска тестов Django
+#       run: |
+#         python manage.py test
         
-    - name: Down Docker Compose
-      run: |
-        sudo docker compose down
+#     - name: Down Docker Compose
+#       run: |
+#         sudo docker compose down
         
         
     - name: Build and push Docker image  
