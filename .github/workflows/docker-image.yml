@@ -45,6 +45,6 @@ jobs:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }} 
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
       run: |
-        docker build -t mydjangoproject .  
-        docker tag mydjangoproject $DOCKER_USERNAME/mydjangoproject 
-        docker push $DOCKER_USERNAME/mydjangoproject 
+        sudo docker build -t mydjangoproject .  
+        sudo docker tag mydjangoproject $DOCKER_USERNAME/mydjangoproject 
+        sudo docker push $DOCKER_USERNAME/mydjangoproject 
