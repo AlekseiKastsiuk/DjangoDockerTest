@@ -39,5 +39,5 @@ jobs:
       run: |
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
         docker-compose -f docker-compose.yml up -d 
-        docker tag DOCKER_USERNAME/myproject:latest $DOCKER_USERNAME/myproject
+        docker tag $DOCKER_USERNAME/myproject:latest $DOCKER_USERNAME/myproject
         docker push $DOCKER_USERNAME/myproject
