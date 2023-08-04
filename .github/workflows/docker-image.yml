@@ -25,7 +25,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           chmod +x wait-for-it.sh
-
+          
+      - name: Install latest version of docker with experimental compose support
+        run: |
+          pip install docker-compose
+          
       - name: Run Django tests  
         run: |
           python manage.py test
@@ -120,9 +124,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: prod
     steps:
-      - name: Send message
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: ${{ github.workflow }} done!
+    
+    - name: Send message
+      uses: appleboy/telegram-action@v1
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: ${{ github.workflow }} done!
+
+
+        
