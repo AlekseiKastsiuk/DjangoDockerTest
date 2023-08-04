@@ -75,18 +75,18 @@ jobs:
 #         scp docker-compose.yml $SSH_USERNAME@$SSH_HOST:/path/to/your/docker-compose.yml
 #         ssh $SSH_USERNAME@$SSH_HOST "docker-compose pull && docker-compose up -d"
         
-#     - name: Build and push Docker image to Azure ACR
-#       env:
-#         AZURE_REGISTRY: ${{ secrets.AZURE_REGISTRY }}
-#         AZURE_APP_ID: ${{ secrets.AZURE_APP_ID }}
-#         AZURE_PASSWORD: ${{ secrets.AZURE_PASSWORD }}
-#         AZURE_TENANT: ${{ secrets.AZURE_TENANT }}
-#       run: |
-#         # Log in to Azure Container Registry
-#         echo $AZURE_PASSWORD | docker login $AZURE_REGISTRY --username $AZURE_APP_ID --password-stdin
 
-#         # Build and tag the Docker image
-#         docker build -t $AZURE_REGISTRY/myproject .
 
-#         # Push the Docker image to Azure Container Registry
-#         docker push $AZURE_REGISTRY/myproject
+#       - name: Login to Azure CLI
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: Build and push Docker images
+#         env:
+#           REGISTRY: your-acr-name.azurecr.io  # Replace 'your-acr-name' with your ACR name
+#           COMPOSE_FILE: path/to/docker-compose.yml  # Replace this with the path to your Docker Compose file
+#         run: |
+#           az acr login --name $REGISTRY
+#           docker-compose -f $COMPOSE_FILE build
+#           docker-compose -f $COMPOSE_FILE push
