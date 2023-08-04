@@ -30,22 +30,14 @@ jobs:
     - name: Login to Docker Hub
       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and Push Docker Images
+    - name: Build Docker Compose
       run: |
-        sudo docker-compose up -d
-        sudo docker-compose build
-        sudo docker-compose push
+        sudo docker compose up -d
 
     - name: Run Django tests  # Шаг для запуска тестов Django
       run: |
         python manage.py test
-
-#     - name: Build and push Docker image  
-#       env:
-#         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Загружаем переменные окружения из Secrets
-#         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-#       run: |
-#         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-#         docker-compose -f docker-compose.yml up -d 
-#         docker tag $DOCKER_USERNAME/myproject:latest $DOCKER_USERNAME/myproject
-#         docker push $DOCKER_USERNAME/myproject
+        
+    - name: Down Docker Compose
+      run: |
+        sudo docker compose down
